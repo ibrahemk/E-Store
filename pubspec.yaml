@@ -39,6 +39,8 @@ dependencies:
     path: packages/features/home
   details:
     path: packages/features/details
+  cart:
+    path: packages/features/cart
 
   flutter_riverpod: ^2.6.1
   auto_route: ^9.2.2

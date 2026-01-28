@@ -1,18 +1,16 @@
-import 'package:auto_route/annotations.dart';
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-@RoutePage()
-class DetailsScreen extends StatefulWidget {
+class DetailsScreen extends ConsumerStatefulWidget {
   final Product product;
 
   const DetailsScreen({super.key, required this.product});
 
   @override
-  State<DetailsScreen> createState() => _DetailsScreenState();
+  ConsumerState<DetailsScreen> createState() => _DetailsScreenState();
 }
 
-class _DetailsScreenState extends State<DetailsScreen> {
+class _DetailsScreenState extends ConsumerState<DetailsScreen> {
   late final PageController _pageController;
   int _currentIndex = 0;
 
@@ -246,7 +244,23 @@ class _DetailsScreenState extends State<DetailsScreen> {
           padding: const EdgeInsets.all(16.0),
           child: ElevatedButton(
             onPressed: () {
-              // Add to cart logic here
+              final db = ref.read(appDatabaseProvider);
+              db.addToCart(
+                CartItemsCompanion.insert(
+                  productId: widget.product.id,
+                  title: widget.product.title,
+                  price: widget.product.price,
+                  imageUrl: widget.product.images.isNotEmpty
+                      ? widget.product.images[0]
+                      : 'https://via.placeholder.com/400',
+                ),
+              );
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${widget.product.title} added to cart'),
+                  duration: const Duration(seconds: 1),
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(
               minimumSize: const Size(double.infinity, 50),
