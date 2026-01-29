@@ -13,6 +13,7 @@ class HomeScreen extends ConsumerWidget {
     final productsAsync = ref.watch(productsProvider);
     final selectedCategoryId = ref.watch(selectedCategoryIdProvider);
     final viewMode = ref.watch(productViewModeNotifierProvider);
+    final currentSort = ref.watch(productSortNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -22,6 +23,7 @@ class HomeScreen extends ConsumerWidget {
               .watch(cartItemsStreamProvider)
               .when(
                 data: (items) => Badge(
+                  isLabelVisible: items.isNotEmpty,
                   label: Text('${items.length}'),
                   child: IconButton(
                     icon: const Icon(Icons.shopping_cart),
@@ -60,7 +62,7 @@ class HomeScreen extends ConsumerWidget {
                       id: -1,
                       name: 'All',
                       slug: 'all',
-                      image: 'https://placehold.co/100x100/4F46E5/FFF?text=All',
+                      image: 'assets/images/all_categories.jpg',
                     ),
                     ...categories,
                   ];
@@ -97,10 +99,6 @@ class HomeScreen extends ConsumerWidget {
                                           width: 3,
                                         )
                                       : null,
-                                  image: DecorationImage(
-                                    image: NetworkImage(category.image),
-                                    fit: BoxFit.cover,
-                                  ),
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black.withOpacity(0.1),
@@ -108,6 +106,28 @@ class HomeScreen extends ConsumerWidget {
                                       offset: const Offset(0, 4),
                                     ),
                                   ],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: category.image.startsWith('assets/')
+                                      ? Image.asset(
+                                          category.image,
+                                          package: 'home',
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Image.network(
+                                          category.image,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                                return Container(
+                                                  color: Colors.grey[200],
+                                                  child: const Icon(
+                                                    Icons.error_outline,
+                                                  ),
+                                                );
+                                              },
+                                        ),
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -155,7 +175,12 @@ class HomeScreen extends ConsumerWidget {
                   Row(
                     children: [
                       PopupMenuButton<ProductSort>(
-                        icon: const Icon(Icons.sort),
+                        icon: Icon(
+                          Icons.sort,
+                          color: currentSort != ProductSort.none
+                              ? Theme.of(context).primaryColor
+                              : null,
+                        ),
                         onSelected: (sort) {
                           ref
                               .read(productSortNotifierProvider.notifier)
@@ -163,8 +188,9 @@ class HomeScreen extends ConsumerWidget {
                         },
                         itemBuilder: (context) => ProductSort.values
                             .map(
-                              (sort) => PopupMenuItem(
+                              (sort) => CheckedPopupMenuItem(
                                 value: sort,
+                                checked: currentSort == sort,
                                 child: Text(sort.label),
                               ),
                             )
@@ -188,6 +214,8 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
             productsAsync.when(
+              skipLoadingOnRefresh: true,
+              skipLoadingOnReload: true,
               data: (products) => products.isEmpty
                   ? const Padding(
                       padding: EdgeInsets.all(32.0),

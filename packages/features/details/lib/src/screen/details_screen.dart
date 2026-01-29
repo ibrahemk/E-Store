@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 class DetailsScreen extends ConsumerStatefulWidget {
   final Product product;
@@ -125,6 +126,31 @@ class _DetailsScreenState extends ConsumerState<DetailsScreen> {
                         ),
                       ),
                     ),
+                  // Share Icon
+                  Positioned(
+                    top: 16,
+                    right: 16,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.8),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.black12),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.share,
+                          color: Colors.black87,
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          Share.share(
+                            'Check out this product: ${widget.product.title} for only \$${widget.product.price.toStringAsFixed(2)}!',
+                            subject: widget.product.title,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                 ],
               ),
 

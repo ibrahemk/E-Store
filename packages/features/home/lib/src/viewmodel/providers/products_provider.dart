@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../repository/home_repository.dart';
@@ -8,29 +7,41 @@ import '../notifiers/product_sort_notifier.dart';
 part 'products_provider.g.dart';
 
 @riverpod
-Future<List<Product>> products(Ref ref) async {
+Future<List<Product>> fetchedProducts(Ref ref, int? categoryId) {
+  // Keep the data in cache even if there are no listeners for a while
+  final link = ref.keepAlive();
+
   final repository = ref.watch(homeRepositoryProvider);
+  return repository.getProducts(categoryId: categoryId);
+}
+
+@riverpod
+Future<List<Product>> products(Ref ref) async {
   final selectedId = ref.watch(selectedCategoryIdProvider);
   final sort = ref.watch(productSortNotifierProvider);
 
-  final products = await repository.getProducts(categoryId: selectedId);
+  // Using the generated provider which supports caching
+  final products = await ref.watch(fetchedProductsProvider(selectedId).future);
+
+  // Clone list to avoid mutating the cached source
+  final sortedProducts = [...products];
 
   switch (sort) {
     case ProductSort.priceAsc:
-      products.sort((a, b) => a.price.compareTo(b.price));
+      sortedProducts.sort((a, b) => a.price.compareTo(b.price));
     case ProductSort.priceDesc:
-      products.sort((a, b) => b.price.compareTo(a.price));
+      sortedProducts.sort((a, b) => b.price.compareTo(a.price));
     case ProductSort.nameAsc:
-      products.sort(
+      sortedProducts.sort(
         (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()),
       );
     case ProductSort.nameDesc:
-      products.sort(
+      sortedProducts.sort(
         (a, b) => b.title.toLowerCase().compareTo(a.title.toLowerCase()),
       );
     case ProductSort.none:
       break;
   }
 
-  return products;
+  return sortedProducts;
 }

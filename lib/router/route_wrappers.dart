@@ -1,5 +1,3 @@
-import 'package:auto_route/auto_route.dart';
-import 'package:core/core.dart';
 import 'package:cart/cart.dart';
 import 'package:home/home.dart';
 import 'package:details/details.dart';

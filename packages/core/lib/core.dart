@@ -1,4 +1,4 @@
-library core;
+library;
 
 // Export shared modules here
 export 'package:flutter_riverpod/flutter_riverpod.dart';

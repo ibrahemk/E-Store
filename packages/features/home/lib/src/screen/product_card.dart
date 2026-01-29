@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:core/core.dart';
 import 'package:estore/app_router_export.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ProductCard extends ConsumerWidget {
   final Product product;
@@ -31,30 +32,57 @@ class ProductCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Product Image
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(8),
-              ),
-              child: AspectRatio(
-                aspectRatio: 1.0,
-                child: Image.network(
-                  product.images.isNotEmpty
-                      ? product.images[0]
-                      : 'https://via.placeholder.com/400',
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[300],
-                      child: const Icon(
-                        Icons.image_not_supported,
-                        size: 50,
-                        color: Colors.grey,
-                      ),
-                    );
-                  },
+            // Product Image with Share Icon
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(8),
+                  ),
+                  child: AspectRatio(
+                    aspectRatio: 1.0,
+                    child: Image.network(
+                      product.images.isNotEmpty
+                          ? product.images[0]
+                          : 'https://via.placeholder.com/400',
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[300],
+                          child: const Icon(
+                            Icons.image_not_supported,
+                            size: 50,
+                            color: Colors.grey,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                 ),
-              ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.5),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.share,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      onPressed: () {
+                        Share.share(
+                          'Check out this product: ${product.title} for only \$${product.price.toStringAsFixed(2)}!',
+                          subject: product.title,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
             // Product Info Section (Dark Background)
             Container(
